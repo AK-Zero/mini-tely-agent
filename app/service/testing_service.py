@@ -1,16 +1,16 @@
 from fastapi import HTTPException
 from typing import List, Dict
 import logging
+import json
 
 from langchain.schema import BaseMessage
-import re, json
 
 from langchain_ollama import ChatOllama
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
-from langchain.chains.llm import LLMChain
 from langchain.chains.conversation.base import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain.output_parsers import PydanticOutputParser
+from typing import List, Dict, Any
 
 from ..config.config import Config
 from ..model.eval_metrics import EvalMetrics
@@ -57,6 +57,7 @@ class TestingService:
         {edits}
 
         Return a single coherent, concise, professional, empathetic, and legally compliant prompt.
+        Provide the revised prompt only, without any additional commentary or explanation.
         """)
         self.rewrite_chain = self.rewrite_prompt | self.llm
 
@@ -114,7 +115,7 @@ class TestingService:
 
         return transcript
 
-    async def evaluate_conversation(self, transcript: List[Dict[str, str]]):
+    async def evaluate_conversation(self, transcript: List[Dict[str, str]]) -> Dict[str, Any]:
         convo_text = "\n".join([f"{m['role'].upper()}: {m['text']}" for m in transcript])
         raw = await self.eval_chain.ainvoke(input={"transcript": convo_text})
         try:
@@ -123,14 +124,14 @@ class TestingService:
             raise HTTPException(status_code=500, detail=f"Eval parse failed: {e}. Raw: {raw}")
         return metrics
 
-    async def rewrite_prompt_text(self, base_prompt: str, edits: List[str]):
+    async def rewrite_prompt_text(self, base_prompt: str, edits: List[str]) -> str:
         if not edits:
             return base_prompt
         edits_text = "\n".join([f"- {e}" for e in edits])
-        return await self.rewrite_chain.ainvoke(input={"base_prompt": base_prompt, "edits": edits_text})
+        revised_prompt = await self.rewrite_chain.ainvoke(input={"base_prompt": base_prompt, "edits": edits_text})
+        return str(revised_prompt.content).strip()
     
-    def extract_recommendations(self, raw: BaseMessage) -> dict:
-        import json
+    def extract_recommendations(self, raw: BaseMessage) -> Dict[str, Any]:
         text = raw.content
         try:
             data = json.loads(text)
