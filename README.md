@@ -105,16 +105,34 @@ The service will be accessible at `http://127.0.0.1:8000`. You can view the inte
 
   * **Simulate Agent Conversation**
 
-      * `POST /testing/improve/prompt`
-      * **Description:** Runs a simulation to test and refine the agent's prompt.
+      * `POST /testing/train/prompt`
+      * **Description:** Runs a simulation to test and refine the agent's prompt with custom persona.
       * **Request Body Example:**
         ```json
         {
-        "base_agent_prompt": "BASE_PROMPT",
-        "persona": {
+        "base_agent_prompt": "string",
+        "personas": [
+            {
             "name": "Angry User",
             "persona_prompt": "You are a person with anger issues and have defaulted on your credit card for over 25000 dollars, and you dont plan on paying it back."
-        },
+            }
+        ],
+        "max_turns": 8
+        }
+        ```
+      * **Response:** Returns the final ratings and the refined prompt after the simulation.
+
+  * **Simulate Agent Conversation**
+
+      * `POST /testing/train/prompt/auto`
+      * **Description:** Runs a simulation to test and refine the agent's prompt with persona generation,
+      * **Request Body Example:**
+        ```json
+        {
+        "base_agent_prompt": "string",
+        "persona_names": [
+            "Laid off executive"
+        ],
         "max_turns": 8
         }
         ```

@@ -62,7 +62,7 @@ class DebtCollectionAgent:
                 base_url=self.config.MODEL_BASE_URL,
                 api_key=self.config.MODEL_KEY,
                 timeout=Timeout(60),
-                temperature=0.4,  
+                temperature=0.3,  
             ),
             tts=elevenlabs.TTS(
                 api_key=self.config.ELEVENLABS_API_KEY,
