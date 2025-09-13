@@ -113,6 +113,7 @@ class InsightsService:
         """
         Main function to orchestrate the analysis and file writing process.
         """
+        risk_counts = {'MEDIUM': 0, 'LOW': 0, 'HIGH': 0}
         if not os.path.isdir(self.config.SOURCE_DIRECTORY):
             print(f"Error: The source directory '{self.config.SOURCE_DIRECTORY}' does not exist.")
             return
@@ -129,16 +130,17 @@ class InsightsService:
 
                 if justification is not None:
                     self.write_insight(filename, risk_category, justification)
+                    if risk_category in risk_counts:
+                        risk_counts[risk_category] += 1
                 else:
-                    # Handle cases where analysis failed
                     error_message = f"Analysis failed for '{filename}'. Reason: {risk_category}"
                     print(f" -> {error_message}")
-                    # Optionally write an error file
                     self.write_insight(filename, "ANALYSIS_FAILED", risk_category)
                 
-                # move processed file from source to a new path self.config.processed_directory
                 processed_dir = self.config.PROCESSED_DIRECTORY
                 os.makedirs(processed_dir, exist_ok=True)
                 new_path = os.path.join(processed_dir, filename)
                 os.rename(file_path, new_path)
+
+        return risk_counts
                 

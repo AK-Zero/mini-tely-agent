@@ -141,8 +141,8 @@ async def generate_insights():
     Generate insights from all transcript files in the source directory.
     """
     try:
-        insights_service.generate()
-        return {"status": "success", "message": "Insights generation completed."}
+        batch_insights = insights_service.generate()
+        return {"status": "success", "Batch Insights" : batch_insights}
         
     except Exception as e:
         logging.error(f"Error generating insights: {e}")
